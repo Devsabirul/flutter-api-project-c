@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:intern_project/constants.dart';
 import 'package:intern_project/controllers/authcontroller.dart';
 import 'package:intern_project/controllers/userdashboard_controller.dart';
+import 'package:restart_app/restart_app.dart';
+
 
 class UserDashboard extends StatefulWidget {
   const UserDashboard({super.key});
@@ -205,7 +207,9 @@ class _UserDashboardState extends State<UserDashboard> {
                           ),
                   ),
                   trailing: InkWell(
-                    onTap: () {},
+                    onTap: () {
+                      Restart.restartApp();
+                    },
                     child: const Icon(
                       Icons.logout,
                     ),

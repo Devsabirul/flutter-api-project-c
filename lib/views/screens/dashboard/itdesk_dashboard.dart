@@ -6,6 +6,7 @@ import 'package:intern_project/constants.dart';
 import 'package:intern_project/controllers/authcontroller.dart';
 import 'package:intern_project/controllers/itdesk_controller.dart';
 import 'package:intern_project/controllers/userdashboard_controller.dart';
+import 'package:restart_app/restart_app.dart';
 
 class ItDeskDashboardScreen extends StatefulWidget {
   const ItDeskDashboardScreen({super.key});
@@ -158,7 +159,7 @@ class _ItDeskDashboardScreenState extends State<ItDeskDashboardScreen> {
                 ),
                 trailing: InkWell(
                   onTap: () {
-                    itDeskController.getCategoryList();
+                    Restart.restartApp();
                   },
                   child: const Icon(
                     Icons.logout,
