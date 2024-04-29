@@ -115,6 +115,7 @@ class AuthController extends GetxController {
       }
     } catch (e) {
       isLoading.value = false;
+      print(e);
       return ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('something wrong, please try again.'),

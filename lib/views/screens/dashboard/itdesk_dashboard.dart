@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intern_project/constants.dart';
@@ -21,6 +20,7 @@ class _ItDeskDashboardScreenState extends State<ItDeskDashboardScreen> {
   ItDeskController itDeskController = Get.put(ItDeskController());
   late int userId;
   int branchId = 0;
+  String selectedSubCategory = "1";
 
   _showTicketDialog(BuildContext context) {
     return showDialog(
@@ -93,6 +93,262 @@ class _ItDeskDashboardScreenState extends State<ItDeskDashboardScreen> {
         });
   }
 
+  _showBranchForm(BuildContext context) {
+    return showDialog(
+        barrierColor: const Color.fromARGB(176, 0, 0, 0),
+        barrierDismissible: false,
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            contentPadding: const EdgeInsets.only(left: 20, right: 20),
+            title: const Text(
+              "Create Branch",
+              style: TextStyle(
+                fontSize: 23,
+                fontFamily: "Poppins",
+                fontWeight: FontWeight.w600,
+                color: primaryColor,
+              ),
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                children: [
+                  TextFormField(
+                    controller: itDeskController.nameController,
+                    keyboardType: TextInputType.name,
+                    decoration: const InputDecoration(
+                      hintText: "name",
+                      contentPadding: EdgeInsets.all(2),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                  TextFormField(
+                    controller: itDeskController.addressController,
+                    keyboardType: TextInputType.name,
+                    decoration: const InputDecoration(
+                      hintText: "address",
+                      contentPadding: EdgeInsets.all(2),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                  TextFormField(
+                    controller: itDeskController.routingController,
+                    keyboardType: TextInputType.name,
+                    decoration: const InputDecoration(
+                      hintText: "routing",
+                      contentPadding: EdgeInsets.all(2),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      itDeskController.createBranchList(context);
+                    },
+                    child: const Text(
+                      "Create",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontFamily: "Poppins",
+                        fontWeight: FontWeight.w600,
+                        color: primaryColor,
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text(
+                      "Cancel",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontFamily: "Poppins",
+                        fontWeight: FontWeight.w600,
+                        color: Colors.red,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          );
+        });
+  }
+
+  _showCategoryForm(BuildContext context) {
+    return showDialog(
+        barrierColor: const Color.fromARGB(176, 0, 0, 0),
+        barrierDismissible: false,
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            contentPadding: const EdgeInsets.only(left: 20, right: 20),
+            title: const Text(
+              "Create Category",
+              style: TextStyle(
+                fontSize: 23,
+                fontFamily: "Poppins",
+                fontWeight: FontWeight.w600,
+                color: primaryColor,
+              ),
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                children: [
+                  TextFormField(
+                    controller: itDeskController.categoryTitleController,
+                    keyboardType: TextInputType.name,
+                    decoration: const InputDecoration(
+                      hintText: "category title",
+                      contentPadding: EdgeInsets.all(2),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      itDeskController.createCategoyList(context);
+                    },
+                    child: const Text(
+                      "Create",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontFamily: "Poppins",
+                        fontWeight: FontWeight.w600,
+                        color: primaryColor,
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text(
+                      "Cancel",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontFamily: "Poppins",
+                        fontWeight: FontWeight.w600,
+                        color: Colors.red,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          );
+        });
+  }
+
+  _showSubCategoryForm(BuildContext context) {
+    return showDialog(
+        barrierColor: const Color.fromARGB(176, 0, 0, 0),
+        barrierDismissible: false,
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            contentPadding: const EdgeInsets.only(left: 20, right: 20),
+            title: const Text(
+              "Create Sub Category",
+              style: TextStyle(
+                fontSize: 23,
+                fontFamily: "Poppins",
+                fontWeight: FontWeight.w600,
+                color: primaryColor,
+              ),
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                children: [
+                  TextFormField(
+                    controller: itDeskController.categoryTitleController,
+                    keyboardType: TextInputType.name,
+                    decoration: const InputDecoration(
+                      hintText: "sub-category title",
+                      contentPadding: EdgeInsets.all(2),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                  DropdownButtonFormField<String>(
+                    value: selectedSubCategory,
+                    items: itDeskController.catergoryList.map((e) {
+                      return DropdownMenuItem(
+                        value: e['id'].toString(),
+                        child: Text(e['title'] ?? ''),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        selectedSubCategory == value;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      itDeskController.createSubCategoyList(
+                          context, selectedSubCategory);
+                    },
+                    child: const Text(
+                      "Create",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontFamily: "Poppins",
+                        fontWeight: FontWeight.w600,
+                        color: primaryColor,
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text(
+                      "Cancel",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontFamily: "Poppins",
+                        fontWeight: FontWeight.w600,
+                        color: Colors.red,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          );
+        });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -101,11 +357,12 @@ class _ItDeskDashboardScreenState extends State<ItDeskDashboardScreen> {
     authController.getCurrentUser(data[0]).then((value) {
       branchId = authController.currentUser[0]['branch_id'];
       Timer(const Duration(seconds: 1), () {
-        itDeskController.getApprovedTicketList(value[0]['branch_id']);
-        itDeskController
-            .getUserList(authController.currentUser[0]['branch_id']);
-        itDeskController.getCategoryList();
+        itDeskController.getApprovedTicketList();
+        itDeskController.getUserList();
+        itDeskController.getCategoryList().then((value) => selectedSubCategory =
+            itDeskController.catergoryList[0]['id'].toString());
         itDeskController.getSubCategoryList();
+        itDeskController.getBranchList();
       });
     });
   }
@@ -202,6 +459,51 @@ class _ItDeskDashboardScreenState extends State<ItDeskDashboardScreen> {
                               ),
                             ),
                           ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 6,
+                  ),
+                  Expanded(
+                    child: InkWell(
+                      onTap: () {
+                        _showBranchButtomSheet(context);
+                      },
+                      child: Container(
+                        height: 80,
+                        decoration: BoxDecoration(
+                          color: Colors.deepOrange,
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                "Total Branch",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 5,
+                              ),
+                              Obx(
+                                () => Text(
+                                  itDeskController.branchList.length.toString(),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 20,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -481,12 +783,28 @@ class _ItDeskDashboardScreenState extends State<ItDeskDashboardScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    const Text(
-                      "Category List:",
-                      style: TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          "Category List:",
+                          style: TextStyle(
+                            fontSize: 25,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            _showCategoryForm(context);
+                          },
+                          child: const Text(
+                            "Add Category",
+                            style: TextStyle(
+                              fontSize: 18,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     const Divider(),
                     Column(
@@ -537,12 +855,23 @@ class _ItDeskDashboardScreenState extends State<ItDeskDashboardScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    const Text(
-                      "Sub Category List:",
-                      style: TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          "Sub Category List:",
+                          style: TextStyle(
+                            fontSize: 25,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            _showSubCategoryForm(context);
+                          },
+                          child: const Icon(Icons.add),
+                        ),
+                      ],
                     ),
                     const Divider(),
                     Column(
@@ -559,6 +888,73 @@ class _ItDeskDashboardScreenState extends State<ItDeskDashboardScreen> {
                               ),
                               subtitle: Text(
                                   "Category id : ${e['categories_id'].toString()}"),
+                              trailing: Text(
+                                e['status'].toString(),
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        });
+  }
+
+  _showBranchButtomSheet(context) {
+    return showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        builder: (context) {
+          return SizedBox(
+            width: Get.width,
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(vertical: 50.0, horizontal: 15),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          "Branch List:",
+                          style: TextStyle(
+                            fontSize: 25,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            _showBranchForm(context);
+                          },
+                          child: const Icon(Icons.add),
+                        ),
+                      ],
+                    ),
+                    const Divider(),
+                    Column(
+                      children: itDeskController.branchList
+                          .map(
+                            (e) => ListTile(
+                              contentPadding: EdgeInsets.zero,
+                              title: Text(
+                                e['name'].toString(),
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              subtitle: Text(
+                                  "Address: ${e['address'].toString()}, Routing ${e['routing']}"),
                               trailing: Text(
                                 e['status'].toString(),
                                 style: const TextStyle(

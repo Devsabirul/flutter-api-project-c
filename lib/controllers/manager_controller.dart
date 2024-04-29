@@ -90,7 +90,6 @@ class ManagerController extends GetxController {
       for (Map<String, dynamic> index in data) {
         userList.add(index);
       }
-      print(userList);
     } catch (e) {
       Get.snackbar("Error", "Something wrong!");
     }

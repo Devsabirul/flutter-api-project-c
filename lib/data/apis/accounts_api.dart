@@ -1,4 +1,4 @@
-var loginApi = 'https://x8ki-letl-twmt.n7.xano.io/api:D_eRidPY/auth/login';
+var loginApi ='https://x8ki-letl-twmt.n7.xano.io/api:D_eRidPY/user/login';
 var registrationApi = 'https://x8ki-letl-twmt.n7.xano.io/api:D_eRidPY/users';
 var currentUserApi = 'https://x8ki-letl-twmt.n7.xano.io/api:D_eRidPY/users';
 var getUserApi =
@@ -6,3 +6,5 @@ var getUserApi =
 
 var getUserWithBranchApi =
     'https://x8ki-letl-twmt.n7.xano.io/api:D_eRidPY/userwithbranch?branch_id';
+
+var userListApi = "https://x8ki-letl-twmt.n7.xano.io/api:D_eRidPY/users";
