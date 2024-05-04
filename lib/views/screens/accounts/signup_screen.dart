@@ -22,7 +22,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   @override
   void initState() {
-    selectedBranch = controller.branchList[0].id.toString();
+    // selectedBranch = controller.branchList[0].id.toString();
     super.initState();
   }
 
@@ -164,12 +164,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           selectedBranch = newValue!;
                         });
                       },
-                      items: controller.branchListDropdown.map((e) {
-                        return DropdownMenuItem(
-                          value: e.id.toString(),
-                          child: Text(e.name ?? ''),
-                        );
-                      }).toList(),
+                      // items: controller.branchListDropdown.map((e) {
+                      //   return DropdownMenuItem(
+                      //     value: e.id.toString(),
+                      //     child: Text(e.name ?? ''),
+                      //   );
+                      // }).toList(),
+                      items: const [
+                        DropdownMenuItem(
+                          value:"1",
+                          child: Text("Branch 1"),
+                        ),
+                      ],
                       decoration: InputDecoration(
                         enabledBorder: OutlineInputBorder(
                           borderSide: const BorderSide(

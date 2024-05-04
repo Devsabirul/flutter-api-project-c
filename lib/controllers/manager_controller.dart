@@ -1,9 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:intern_project/data/apis/accounts_api.dart';
 import 'package:intern_project/data/apis/managerdashboard_api.dart';
 import 'package:intern_project/data/apis/userdashboard_api.dart';
 import 'package:intern_project/models/ticket_model.dart';
@@ -13,37 +13,50 @@ class ManagerController extends GetxController {
   RxList ticketInfo = [].obs;
   RxList userList = [].obs;
 
-  Future getTicketList(branchId) async {
+  Future getUserList(token) async {
     try {
-      final res = await http.get(Uri.parse("$getTicketByBranch=$branchId"));
+      final res = await http.get(
+        Uri.parse(getUserListAndTikets),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
       var data = jsonDecode(res.body);
-      ticketList.clear();
+      if (res.statusCode == 200) {
+        userList.clear();
+        ticketList.clear();
 
-      for (Map<String, dynamic> index in data) {
-        ticketList.add(TicketsModel.fromJson(index));
+        for (Map<String, dynamic> index in data['user']) {
+          // add user list
+          if (index['role'] == "user") {
+            userList.add(index);
+          }
+
+          // add ticket in ticketlist
+          if (index['tickets'].isNotEmpty) {
+            for (Map<String, dynamic> json in index['tickets']) {
+              ticketList.add(TicketsModel.fromJson(json));
+            }
+          }
+        }
       }
-      return ticketList;
     } catch (e) {
       return [];
     }
   }
 
-  Future getTicketInfo(ticketId) async {
-    try {
-      final res = await http.get(Uri.parse("$ticketApi/$ticketId"));
-      var data = jsonDecode(res.body);
-      ticketInfo.clear();
-      ticketInfo.add(TicketsModel.fromJson(data));
-      return ticketInfo;
-    } catch (e) {
-      return [];
-    }
+  Future getTicketInfo(ticketInstance) async {
+    ticketInfo.clear();
+    ticketInfo.add(ticketInstance);
+    return ticketInfo;
   }
 
   Future updateTicket(context, id, status) async {
     try {
       var res = await http.patch(
-        Uri.parse("$ticketApi/$id"),
+        Uri.parse("$getTicketApi/$id"),
         headers: {
           "Accept": "application/json",
           "Content-Type": "application/x-www-form-urlencoded"
@@ -80,18 +93,6 @@ class ManagerController extends GetxController {
         ),
       );
       Navigator.pop(context);
-    }
-  }
-
-  Future getUserList(id) async {
-    try {
-      final res = await http.get(Uri.parse("$getUserApi=$id&role_type=user"));
-      var data = jsonDecode(res.body);
-      for (Map<String, dynamic> index in data) {
-        userList.add(index);
-      }
-    } catch (e) {
-      Get.snackbar("Error", "Something wrong!");
     }
   }
 }

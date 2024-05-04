@@ -3,8 +3,6 @@ import 'package:get/get.dart';
 import 'package:intern_project/constants.dart';
 import 'package:intern_project/controllers/authcontroller.dart';
 import 'package:intern_project/controllers/userdashboard_controller.dart';
-import 'package:restart_app/restart_app.dart';
-
 
 class UserDashboard extends StatefulWidget {
   const UserDashboard({super.key});
@@ -63,15 +61,15 @@ class _UserDashboardState extends State<UserDashboard> {
                   const SizedBox(
                     height: 5,
                   ),
-                  DropdownButtonFormField<String>(
+                  DropdownButtonFormField(
                     value: selectedCategory,
-                    items: userController.categories.map((e) {
+                    items: userController.categoryList.map((e) {
                       return DropdownMenuItem(
-                        value: e.id.toString(),
-                        child: Text(e.title ?? ''),
+                        value: e['id'].toString(),
+                        child: Text(e['title'].toString()),
                       );
                     }).toList(),
-                    onChanged: (value) {
+                    onChanged: (String? value) {
                       setState(() {
                         selectedCategory == value;
                       });
@@ -82,10 +80,10 @@ class _UserDashboardState extends State<UserDashboard> {
                   ),
                   DropdownButtonFormField<String>(
                     value: selectedSubCategory,
-                    items: userController.subCategories.map((e) {
+                    items: userController.subCategoryList.map((e) {
                       return DropdownMenuItem(
-                        value: e.id.toString(),
-                        child: Text(e.title ?? ''),
+                        value: e['id'].toString(),
+                        child: Text(e['title'] ?? ''),
                       );
                     }).toList(),
                     onChanged: (value) {
@@ -111,9 +109,11 @@ class _UserDashboardState extends State<UserDashboard> {
                               context,
                               authController.currentUser[0]['branch_id'],
                               selectedCategory,
-                              selectedSubCategory)
-                          .then((value) =>
-                              userController.getTicketByUser(userId));
+                              selectedSubCategory,
+                              authController.authToken.value,
+                              userId)
+                          .then((value) => userController
+                              .getTicketByUser(authController.authToken.value));
                     },
                     child: const Text(
                       "Create",
@@ -151,11 +151,10 @@ class _UserDashboardState extends State<UserDashboard> {
     super.initState();
     var data = Get.arguments;
     userId = data[0];
-    authController.getCurrentUser(data[0]).then((value) =>
-        userController.currentUserId.value = value[0]['id'].toString());
-    selectedCategory = userController.categories[0].id.toString();
-    selectedSubCategory = userController.subCategories[0].id.toString();
-    userController.getTicketByUser(data[0]);
+    userController
+        .getCategories(authController.authToken.value)
+        .then((value) => selectedCategory = value[0]['id'].toString());
+    userController.getTicketByUser(authController.authToken.value);
   }
 
   @override
@@ -208,7 +207,9 @@ class _UserDashboardState extends State<UserDashboard> {
                   ),
                   trailing: InkWell(
                     onTap: () {
-                      Restart.restartApp();
+                      // Restart.restartApp();
+                      userController
+                          .getTicketByUser(authController.authToken.value);
                     },
                     child: const Icon(
                       Icons.logout,
@@ -317,13 +318,7 @@ class _UserDashboardState extends State<UserDashboard> {
                             ),
                             subtitle: Text(e.status.toString()),
                             trailing: InkWell(
-                              onTap: () {
-                                userController
-                                    .getTicketInfo(e.id)
-                                    .then((value) {
-                                  _showTicketDialog(context);
-                                });
-                              },
+                              onTap: () {},
                               child: const Icon(
                                 Icons.info_outline,
                                 size: 30,
@@ -340,207 +335,5 @@ class _UserDashboardState extends State<UserDashboard> {
         ),
       ),
     );
-  }
-
-  _showTicketDialog(BuildContext context) {
-    return showDialog(
-        barrierColor: const Color.fromARGB(176, 0, 0, 0),
-        barrierDismissible: false,
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            contentPadding: const EdgeInsets.only(left: 20, right: 20),
-            title: const Text(
-              "Ticket Info",
-              style: TextStyle(
-                fontSize: 23,
-                fontFamily: "Poppins",
-                fontWeight: FontWeight.w600,
-                color: primaryColor,
-              ),
-            ),
-            content: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  Text(
-                    "Current subject : ${userController.ticketInfo[0].subject}",
-                  ),
-                  const SizedBox(height: 5),
-                  TextFormField(
-                    controller: userController.subjectController,
-                    keyboardType: TextInputType.name,
-                    decoration: const InputDecoration(
-                      hintText: "subject",
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Colors.grey,
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 5,
-                  ),
-                  Text(
-                    "Current subject : ${userController.ticketInfo[0].details}",
-                  ),
-                  const SizedBox(height: 5),
-                  TextFormField(
-                    controller: userController.detailsController,
-                    keyboardType: TextInputType.name,
-                    decoration: const InputDecoration(
-                      hintText: "details",
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Colors.grey,
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 5,
-                  ),
-                  Text(
-                    "Current category: ${userController.ticketInfo[0].categoriesId}",
-                  ),
-                  const SizedBox(height: 5),
-                  DropdownButtonFormField<String>(
-                    value: selectedCategory,
-                    items: userController.categories.map((e) {
-                      return DropdownMenuItem(
-                        value: e.id.toString(),
-                        child: Text(e.title ?? ''),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        selectedCategory == value;
-                      });
-                    },
-                    decoration: const InputDecoration(
-                      hintText: "Category",
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Colors.grey,
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 5,
-                  ),
-                  Text(
-                    "Current subcategory: ${userController.ticketInfo[0].subcategoriesId}",
-                  ),
-                  const SizedBox(height: 5),
-                  DropdownButtonFormField<String>(
-                    value: selectedSubCategory,
-                    items: userController.subCategories.map((e) {
-                      return DropdownMenuItem(
-                        value: e.id.toString(),
-                        child: Text(e.title ?? ''),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        selectedSubCategory == value;
-                      });
-                    },
-                    decoration: const InputDecoration(
-                      hintText: "Sub Category",
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Colors.grey,
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 5,
-                  ),
-                ],
-              ),
-            ),
-            actions: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton(
-                    onPressed: () {
-                      var ticketId = userController.ticketInfo[0].id.toString();
-                      var status =
-                          userController.ticketInfo[0].status.toString();
-                      userController
-                          .updateTicket(
-                              context,
-                              authController.currentUser[0]['branch_id'],
-                              selectedCategory,
-                              selectedSubCategory,
-                              ticketId,
-                              status)
-                          .then((value) =>
-                              userController.getTicketByUser(userId));
-                    },
-                    child: const Text(
-                      "Update",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontFamily: "Poppins",
-                        fontWeight: FontWeight.w600,
-                        color: primaryColor,
-                      ),
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: const Text(
-                      "Cancel",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontFamily: "Poppins",
-                        fontWeight: FontWeight.w600,
-                        color: Colors.red,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          );
-        });
   }
 }

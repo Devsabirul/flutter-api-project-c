@@ -3,9 +3,7 @@ import 'package:intern_project/views/screens/dashboard/itdesk_dashboard.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intern_project/data/apis/branch_api.dart';
 import 'package:intern_project/data/apis/accounts_api.dart';
-import 'package:intern_project/models/branch_model.dart';
 import 'package:intern_project/views/screens/accounts/login_screen.dart';
 import 'package:intern_project/views/screens/dashboard/manager_dashboard.dart';
 import 'package:intern_project/views/screens/dashboard/user_dashboard.dart';
@@ -37,27 +35,6 @@ class AuthController extends GetxController {
     phoneNumberController.clear();
   }
 
-  Future getBranchList() async {
-    try {
-      final res = await http.get(Uri.parse(branchListApi));
-      var data = jsonDecode(res.body);
-      if (res.statusCode == 200) {
-        branchList.clear();
-        for (Map<String, dynamic> index in data) {
-          branchList.add(BranchModel.fromJson(index));
-        }
-        for (var e in branchList) {
-          if (e.status == 'active') {
-            branchListDropdown.add(e);
-          }
-        }
-        return branchList;
-      }
-    } catch (e) {
-      return [];
-    }
-  }
-
   Future login(context) async {
     isLoading.value = true;
     try {
@@ -83,6 +60,8 @@ class AuthController extends GetxController {
           isLoading.value = false;
 
           var data = jsonDecode(res.body);
+          currentUser.add(data['users']);
+          authToken.value = data['token'];
           role.value = data['users']['role'];
           if (role.value == 'user') {
             Get.off(const UserDashboard(),
@@ -115,7 +94,6 @@ class AuthController extends GetxController {
       }
     } catch (e) {
       isLoading.value = false;
-      print(e);
       return ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('something wrong, please try again.'),
@@ -127,14 +105,20 @@ class AuthController extends GetxController {
 
   Future registration(branchId, accoutRole, context) async {
     isLoading.value = true;
+    String branchid = branchId;
+    String registrationApi = "";
     try {
       var userRole = "";
       if (accoutRole == "1") {
         userRole = "user";
+        registrationApi = userRegister;
       } else if (accoutRole == "2") {
         userRole = "manager";
+        registrationApi = managerRegister;
       } else if (accoutRole == "3") {
         userRole = "itdesk";
+        branchid = "1";
+        registrationApi = itdeskRegister;
       }
       final res = await http.post(
         Uri.parse(registrationApi),
@@ -147,10 +131,11 @@ class AuthController extends GetxController {
           "email": emailController.text,
           "role": userRole,
           "password": passwordController.text,
-          "branch_id": branchId,
+          "branch_id": branchid,
         },
       );
-      if (res.statusCode == 200) {
+      var data = jsonDecode(res.body);
+      if (res.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Accout created successfully.'),
@@ -158,6 +143,12 @@ class AuthController extends GetxController {
         );
         clearfield();
         Get.to(const LoginScreen(), transition: Transition.noTransition);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("${data['message']}"),
+          ),
+        );
       }
     } catch (e) {
       return ScaffoldMessenger.of(context).showSnackBar(
@@ -179,28 +170,4 @@ class AuthController extends GetxController {
     clearfield();
   }
 
-  // save login info
-  saveLoginInfo(role) async {
-    var prefs = await SharedPreferences.getInstance();
-    prefs.setString("role", role);
-    prefs.setBool("isLoggedIn", true);
-  }
-
-  // get login info
-  getIsLoggedIn() async {
-    var prefs = await SharedPreferences.getInstance();
-    var userRole = prefs.getString("role");
-    var loginValue = prefs.getBool("isLoggedIn");
-    isLoggedIn.value = loginValue ?? false;
-    role.value = userRole.toString();
-  }
-
-  Future getCurrentUser(id) async {
-    try {
-      final res = await http.get(Uri.parse("$currentUserApi/$id"));
-      var data = jsonDecode(res.body);
-      currentUser.add(data);
-      return currentUser;
-    } catch (e) {}
-  }
 }

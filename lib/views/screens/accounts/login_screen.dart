@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:intern_project/constants.dart';
 import 'package:intern_project/controllers/authcontroller.dart';
 import 'package:email_validator/email_validator.dart';
+import 'package:intern_project/controllers/userdashboard_controller.dart';
 import 'package:intern_project/views/screens/accounts/signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -14,6 +15,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   AuthController controller = Get.put(AuthController());
+  UserDashboardController userController = Get.put(UserDashboardController());
   bool isPasswordHidden = true;
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
   @override
@@ -199,7 +201,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       onPressed: () {
-                        controller.login(context);
+                        controller.login(context).then((value) => userController
+                            .getCategories(controller.authToken.value));
                       },
                       child: Obx(
                         () => controller.isLoading.value

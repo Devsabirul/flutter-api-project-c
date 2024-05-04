@@ -5,8 +5,6 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:intern_project/controllers/authcontroller.dart';
 import 'package:intern_project/data/apis/userdashboard_api.dart';
-import 'package:intern_project/models/category_model.dart';
-import 'package:intern_project/models/sub_category_model.dart';
 import 'package:intern_project/models/ticket_model.dart';
 
 class UserDashboardController extends GetxController {
@@ -28,18 +26,40 @@ class UserDashboardController extends GetxController {
     detailsController.clear();
   }
 
-  Future getCategories() async {
+  Future getCategories(token) async {
     try {
-      final res = await http.get(Uri.parse(categoryApi));
+      final res = await http.get(
+        Uri.parse(categoryApi),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
       var data = jsonDecode(res.body);
       if (res.statusCode == 200) {
+        // clear list
         categoryList.clear();
+        subCategoryList.clear();
+
+        // add category list
         for (Map<String, dynamic> index in data) {
-          categoryList.add(CategoryModel.fromJson(index));
+          categoryList.add(index);
         }
+
+        // add only active  category
         for (var e in categoryList) {
-          if (e.status == 'active') {
+          if (e['status'] == 'active') {
             categories.add(e);
+          }
+        }
+
+        // add subcategory list
+        for (var e in categoryList) {
+          if (e['subcategory'].isNotEmpty) {
+            for (Map<String, dynamic> i in e['subcategory']) {
+              subCategoryList.add(i);
+            }
           }
         }
         return categories;
@@ -49,34 +69,20 @@ class UserDashboardController extends GetxController {
     }
   }
 
-  Future getSubCategories() async {
+  Future getTicketByUser(token) async {
     try {
-      final res = await http.get(Uri.parse(subCategoryApi));
-      var data = jsonDecode(res.body);
-      if (res.statusCode == 200) {
-        subCategoryList.clear();
-        for (Map<String, dynamic> index in data) {
-          subCategoryList.add(SubCategoryModel.fromJson(index));
-        }
-        for (var e in subCategoryList) {
-          if (e.status == 'active') {
-            subCategories.add(e);
-          }
-        }
-        return subCategories;
-      }
-    } catch (e) {
-      return [];
-    }
-  }
-
-  Future getTicketByUser(userId) async {
-    try {
-      final res = await http.get(Uri.parse("$getTiketByUserIdApi=$userId"));
+      final res = await http.get(
+        Uri.parse(getTicketApi),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
       var data = jsonDecode(res.body);
       if (res.statusCode == 200) {
         tickets.clear();
-        for (Map<String, dynamic> index in data) {
+        for (Map<String, dynamic> index in data['tickets']) {
           tickets.add(TicketsModel.fromJson(index));
         }
         return tickets;
@@ -86,46 +92,47 @@ class UserDashboardController extends GetxController {
     }
   }
 
-  Future getTicketInfo(ticketId) async {
-    try {
-      final res = await http.get(Uri.parse("$ticketApi/$ticketId"));
-      var data = jsonDecode(res.body);
-      ticketInfo.clear();
-      ticketInfo.add(TicketsModel.fromJson(data));
-      return ticketInfo;
-    } catch (e) {
-      return [];
-    }
-  }
-
-  Future createTicket(context, branchId, categoryId, subCategoryId) async {
+  Future createTicket(
+      context, branchId, categoryId, subCategoryId, token, userId) async {
     try {
       if (subjectController.text.isNotEmpty &&
           detailsController.text.isNotEmpty) {
         var res = await http.post(
-          Uri.parse(ticketApi),
+          Uri.parse(createTicketApi),
           headers: {
             "Accept": "application/json",
-            "Content-Type": "application/x-www-form-urlencoded"
+            "Content-Type": "application/json",
+            "Authorization": "Bearer $token",
           },
-          body: {
-            "subject": subjectController.text,
-            "details": detailsController.text,
+          body: jsonEncode({
+            "subject": subjectController.text.toString(),
+            "details": detailsController.text.toString(),
             "status": "in_progress",
             "branch_id": branchId.toString(),
-            "categories_id": categoryId.toString(),
-            "subcategories_id": subCategoryId.toString(),
-            "users_id": currentUserId.toString(),
-          },
+            "category_id": categoryId.toString(),
+            "sub_category_id": subCategoryId.toString(),
+            "created_by": userId.toString(),
+            "solved_by": "11",
+          }),
         );
-        if (res.statusCode == 200) {
+
+        // Check for any successful status code
+        if (res.statusCode >= 200 && res.statusCode < 300) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Ticket create successfully.'),
+              content: Text('Ticket created successfully.'),
             ),
           );
           clearfield();
           Navigator.pop(context);
+        } else {
+          // Handle other status codes (e.g., validation errors, server errors)
+          // You can extract error messages from the response body if available
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to create ticket. ${res.reasonPhrase}'),
+            ),
+          );
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -136,16 +143,22 @@ class UserDashboardController extends GetxController {
         Navigator.pop(context);
       }
     } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('An error occurred. Please try again later.'),
+        ),
+      );
       Navigator.pop(context);
     }
   }
 
-  Future updateTicket(context, branchId, categoryId, subCategoryId, id,status) async {
+  Future updateTicket(
+      context, branchId, categoryId, subCategoryId, id, status) async {
     try {
       if (subjectController.text.isNotEmpty &&
           detailsController.text.isNotEmpty) {
         var res = await http.patch(
-          Uri.parse("$ticketApi/$id"),
+          Uri.parse("$getTicketApi/$id"),
           headers: {
             "Accept": "application/json",
             "Content-Type": "application/x-www-form-urlencoded"

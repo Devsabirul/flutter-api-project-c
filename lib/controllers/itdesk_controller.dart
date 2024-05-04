@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:intern_project/data/apis/accounts_api.dart';
+import 'package:intern_project/controllers/authcontroller.dart';
 import 'package:intern_project/data/apis/branch_api.dart';
-import 'package:intern_project/data/apis/userdashboard_api.dart';
+import 'package:intern_project/data/apis/iddesk_api.dart';
 import 'package:intern_project/models/ticket_model.dart';
 
 class ItDeskController extends GetxController {
@@ -14,6 +14,8 @@ class ItDeskController extends GetxController {
   TextEditingController routingController = TextEditingController();
 
   TextEditingController categoryTitleController = TextEditingController();
+
+  AuthController controller = Get.put(AuthController());
 
   RxList approvedticket = [].obs;
   RxList userList = [].obs;
@@ -28,69 +30,80 @@ class ItDeskController extends GetxController {
     routingController.clear();
   }
 
-  Future getApprovedTicketList() async {
+  Future getUserListAndTickets(token) async {
     try {
-      final res = await http.get(Uri.parse(
-          'https://x8ki-letl-twmt.n7.xano.io/api:D_eRidPY/approvedticketlist?status=approved'));
-
+      final res = await http.get(
+        Uri.parse(getUserListAndTikets),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      var data = jsonDecode(res.body);
       if (res.statusCode == 200) {
-        var data = jsonDecode(res.body);
+        userList.clear();
         approvedticket.clear();
 
-        for (Map<String, dynamic> index in data) {
-          approvedticket.add(TicketsModel.fromJson(index));
+        for (Map<String, dynamic> index in data['user']) {
+          // add user list
+          userList.add(index);
+
+          // add ticket list
+          for (Map<String, dynamic> json in index['tickets']) {
+            approvedticket.add(TicketsModel.fromJson(json));
+          }
         }
-        return approvedticket;
-      } else {
-        Get.snackbar("Error", "Something wrong.");
       }
     } catch (e) {
-      print(e);
+      return [];
     }
   }
 
-  Future getUserList() async {
+  Future getCategoryList(token) async {
     try {
-      final res = await http.get(Uri.parse(userListApi));
-      var data = jsonDecode(res.body);
-      for (Map<String, dynamic> index in data) {
-        userList.add(index);
-      }
-    } catch (e) {
-      Get.snackbar("Error", "Something wrong!");
-    }
-  }
-
-  Future getCategoryList() async {
-    try {
-      final res = await http.get(Uri.parse(categoryApi));
+      final res = await http.get(
+        Uri.parse(getCategoryLists),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
       var data = jsonDecode(res.body);
       catergoryList.clear();
+      subCatergoryList.clear();
+
+      // add category list
       for (Map<String, dynamic> index in data) {
         catergoryList.add(index);
       }
-      print(catergoryList);
-    } catch (e) {
-      Get.snackbar("Error", "Something wrong!");
-    }
-  }
 
-  Future getSubCategoryList() async {
-    try {
-      final res = await http.get(Uri.parse(subCategoryApi));
-      var data = jsonDecode(res.body);
-      subCatergoryList.clear();
-      for (Map<String, dynamic> index in data) {
-        subCatergoryList.add(index);
+      // add subcategory list
+      for (var e in catergoryList) {
+        if (e['subcategory'].isNotEmpty) {
+          for (Map<String, dynamic> i in e['subcategory']) {
+            subCatergoryList.add(i);
+          }
+        }
       }
+
+      return catergoryList;
     } catch (e) {
       Get.snackbar("Error", "Something wrong!");
     }
   }
 
-  Future getBranchList() async {
+  Future getBranchList(token) async {
     try {
-      final res = await http.get(Uri.parse(branchListApi));
+      final res = await http.get(
+        Uri.parse(branchListApi),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
       var data = jsonDecode(res.body);
       branchList.clear();
       for (Map<String, dynamic> index in data) {
@@ -101,28 +114,23 @@ class ItDeskController extends GetxController {
     }
   }
 
-  Future getTicketInfo(ticketId) async {
-    try {
-      final res = await http.get(Uri.parse("$ticketApi/$ticketId"));
-      var data = jsonDecode(res.body);
-      ticketInfo.clear();
-      ticketInfo.add(TicketsModel.fromJson(data));
-      return ticketInfo;
-    } catch (e) {
-      return [];
-    }
+  Future getTicketInfo(ticketInstance) async {
+    ticketInfo.clear();
+    ticketInfo.add(ticketInstance);
+    return ticketInfo;
   }
 
-  Future createBranchList(context) async {
+  Future createBranchList(context,token) async {
     try {
       if (nameController.text.isNotEmpty &&
           addressController.text.isNotEmpty &&
           routingController.text.isNotEmpty) {
         final res = await http.post(
-          Uri.parse(branchListApi),
+          Uri.parse(createBranchApi),
           headers: {
             "Accept": "application/json",
-            "Content-Type": "application/x-www-form-urlencoded"
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Authorization": 'Bearer $token',
           },
           body: {
             "name": nameController.text,
@@ -137,7 +145,7 @@ class ItDeskController extends GetxController {
               content: Text('Branch create successfully.'),
             ),
           );
-          getBranchList();
+          getBranchList(controller.authToken.value);
           Navigator.pop(context);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -149,19 +157,19 @@ class ItDeskController extends GetxController {
         }
       }
     } catch (e) {
-      print(e);
       Navigator.pop(context);
     }
   }
 
-  Future createCategoyList(context) async {
+  Future createCategoyList(context, token) async {
     try {
       if (categoryTitleController.text.isNotEmpty) {
         final res = await http.post(
-          Uri.parse(categoryApi),
+          Uri.parse(createCategoryApi),
           headers: {
             "Accept": "application/json",
-            "Content-Type": "application/x-www-form-urlencoded"
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Authorization": 'Bearer $token',
           },
           body: {
             "title": categoryTitleController.text,
@@ -174,8 +182,7 @@ class ItDeskController extends GetxController {
               content: Text('Category create successfully.'),
             ),
           );
-          getSubCategoryList();
-          catergoryList.clear();
+          getCategoryList(controller.authToken.value);
           Navigator.pop(context);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -187,45 +194,44 @@ class ItDeskController extends GetxController {
         }
       }
     } catch (e) {
-      print(e);
       Navigator.pop(context);
     }
   }
-  Future createSubCategoyList(context,selectedCategory) async {
+
+  Future createSubCategoyList(context, selectedCategory, token) async {
     try {
       if (categoryTitleController.text.isNotEmpty) {
         final res = await http.post(
-          Uri.parse(categoryApi),
+          Uri.parse(createSubCategoryApi),
           headers: {
             "Accept": "application/json",
-            "Content-Type": "application/x-www-form-urlencoded"
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Authorization": "Bearer $token",
           },
           body: {
             "title": categoryTitleController.text,
             "status": "active",
-            "categories_id":selectedCategory.toString(),
+            "category_id": selectedCategory.toString(),
           },
         );
         if (res.statusCode == 200) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Category create successfully.'),
+              content: Text('Sub Category create successfully.'),
             ),
           );
-          getSubCategoryList();
-          catergoryList.clear();
+          getCategoryList(controller.authToken.value);
           Navigator.pop(context);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Category create unSuccessfully.'),
+              content: Text('Sub Category create unSuccessfully.'),
             ),
           );
           Navigator.pop(context);
         }
       }
     } catch (e) {
-      print(e);
       Navigator.pop(context);
     }
   }

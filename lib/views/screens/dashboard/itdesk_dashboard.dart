@@ -1,11 +1,9 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intern_project/constants.dart';
 import 'package:intern_project/controllers/authcontroller.dart';
 import 'package:intern_project/controllers/itdesk_controller.dart';
 import 'package:intern_project/controllers/userdashboard_controller.dart';
-import 'package:restart_app/restart_app.dart';
 
 class ItDeskDashboardScreen extends StatefulWidget {
   const ItDeskDashboardScreen({super.key});
@@ -47,7 +45,7 @@ class _ItDeskDashboardScreenState extends State<ItDeskDashboardScreen> {
                     height: 20,
                   ),
                   Text(
-                    "Subject: ${itDeskController.ticketInfo[0].subject.toString()}",
+                    itDeskController.ticketInfo[0].subject.toString(),
                     style: const TextStyle(
                       fontSize: 18,
                     ),
@@ -55,7 +53,7 @@ class _ItDeskDashboardScreenState extends State<ItDeskDashboardScreen> {
                   const SizedBox(
                     height: 5,
                   ),
-                  Text("User Id: ${itDeskController.ticketInfo[0].usersId}"),
+                  Text("User Id: ${itDeskController.ticketInfo[0].createdBy}"),
                   const SizedBox(
                     height: 5,
                   ),
@@ -155,7 +153,8 @@ class _ItDeskDashboardScreenState extends State<ItDeskDashboardScreen> {
                 children: [
                   TextButton(
                     onPressed: () {
-                      itDeskController.createBranchList(context);
+                      itDeskController.createBranchList(
+                          context, authController.authToken.value);
                     },
                     child: const Text(
                       "Create",
@@ -228,7 +227,8 @@ class _ItDeskDashboardScreenState extends State<ItDeskDashboardScreen> {
                 children: [
                   TextButton(
                     onPressed: () {
-                      itDeskController.createCategoyList(context);
+                      itDeskController.createCategoyList(
+                          context, authController.authToken.value);
                     },
                     child: const Text(
                       "Create",
@@ -315,8 +315,8 @@ class _ItDeskDashboardScreenState extends State<ItDeskDashboardScreen> {
                 children: [
                   TextButton(
                     onPressed: () {
-                      itDeskController.createSubCategoyList(
-                          context, selectedSubCategory);
+                      itDeskController.createSubCategoyList(context,
+                          selectedSubCategory, authController.authToken.value);
                     },
                     child: const Text(
                       "Create",
@@ -354,17 +354,9 @@ class _ItDeskDashboardScreenState extends State<ItDeskDashboardScreen> {
     super.initState();
     var data = Get.arguments;
     userId = data[0];
-    authController.getCurrentUser(data[0]).then((value) {
-      branchId = authController.currentUser[0]['branch_id'];
-      Timer(const Duration(seconds: 1), () {
-        itDeskController.getApprovedTicketList();
-        itDeskController.getUserList();
-        itDeskController.getCategoryList().then((value) => selectedSubCategory =
-            itDeskController.catergoryList[0]['id'].toString());
-        itDeskController.getSubCategoryList();
-        itDeskController.getBranchList();
-      });
-    });
+    itDeskController.getUserListAndTickets(authController.authToken.value);
+    itDeskController.getBranchList(authController.authToken.value);
+    itDeskController.getCategoryList(authController.authToken.value);
   }
 
   @override
@@ -416,7 +408,9 @@ class _ItDeskDashboardScreenState extends State<ItDeskDashboardScreen> {
                 ),
                 trailing: InkWell(
                   onTap: () {
-                    Restart.restartApp();
+                    // Restart.restartApp();
+                    itDeskController
+                        .getCategoryList(authController.authToken.value);
                   },
                   child: const Icon(
                     Icons.logout,
@@ -609,7 +603,11 @@ class _ItDeskDashboardScreenState extends State<ItDeskDashboardScreen> {
                   Expanded(
                     child: InkWell(
                       onTap: () {
-                        _showSubCategoryButtomSheet(context);
+                        itDeskController
+                            .getCategoryList(authController.authToken.value)
+                            .then((value) {
+                          _showSubCategoryButtomSheet(context);
+                        });
                       },
                       child: Container(
                         height: 80,
@@ -690,9 +688,7 @@ class _ItDeskDashboardScreenState extends State<ItDeskDashboardScreen> {
                           ),
                           trailing: InkWell(
                             onTap: () {
-                              itDeskController
-                                  .getTicketInfo(e.id)
-                                  .then((value) {
+                              itDeskController.getTicketInfo(e).then((value) {
                                 _showTicketDialog(context);
                               });
                             },
@@ -887,7 +883,7 @@ class _ItDeskDashboardScreenState extends State<ItDeskDashboardScreen> {
                                 ),
                               ),
                               subtitle: Text(
-                                  "Category id : ${e['categories_id'].toString()}"),
+                                  "Category id : ${e['category_id'].toString()}"),
                               trailing: Text(
                                 e['status'].toString(),
                                 style: const TextStyle(

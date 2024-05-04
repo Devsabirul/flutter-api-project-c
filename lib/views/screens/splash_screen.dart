@@ -1,6 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intern_project/constants.dart';
 import 'package:intern_project/controllers/authcontroller.dart';
 import 'package:intern_project/controllers/userdashboard_controller.dart';
 import 'package:intern_project/views/screens/accounts/login_screen.dart';
@@ -19,9 +20,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   void initState() {
-    userDashboardController.getCategories();
-    userDashboardController.getSubCategories();
-    authController.getBranchList().then((value) {
+    Timer(const Duration(seconds: 2), () {
       Get.off(const LoginScreen(), transition: Transition.noTransition);
     });
     super.initState();

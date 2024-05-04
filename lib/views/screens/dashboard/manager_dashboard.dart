@@ -1,11 +1,9 @@
-import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intern_project/constants.dart';
 import 'package:intern_project/controllers/authcontroller.dart';
 import 'package:intern_project/controllers/manager_controller.dart';
-import 'package:restart_app/restart_app.dart';
 
 class ManagerDashboard extends StatefulWidget {
   const ManagerDashboard({super.key});
@@ -54,7 +52,7 @@ class _ManagerDashboardState extends State<ManagerDashboard> {
                   const SizedBox(
                     height: 5,
                   ),
-                  Text("User Id: ${managerController.ticketInfo[0].usersId}"),
+                  Text("User Id: ${managerController.ticketInfo[0].createdBy}"),
                   const SizedBox(
                     height: 5,
                   ),
@@ -75,14 +73,7 @@ class _ManagerDashboardState extends State<ManagerDashboard> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   TextButton(
-                    onPressed: () {
-                      var ticketId =
-                          managerController.ticketInfo[0].id.toString();
-                      managerController
-                          .updateTicket(context, ticketId, "approved")
-                          .then((value) =>
-                              managerController.getTicketList(branchId));
-                    },
+                    onPressed: () {},
                     child: const Text(
                       "Approved",
                       style: TextStyle(
@@ -94,14 +85,7 @@ class _ManagerDashboardState extends State<ManagerDashboard> {
                     ),
                   ),
                   TextButton(
-                    onPressed: () {
-                      var ticketId =
-                          managerController.ticketInfo[0].id.toString();
-                      managerController
-                          .updateTicket(context, ticketId, "cancel")
-                          .then((value) =>
-                              managerController.getTicketList(branchId));
-                    },
+                    onPressed: () {},
                     child: const Text(
                       "Cancel",
                       style: TextStyle(
@@ -124,13 +108,7 @@ class _ManagerDashboardState extends State<ManagerDashboard> {
     super.initState();
     var data = Get.arguments;
     userId = data[0];
-    authController.getCurrentUser(data[0]).then((value) {
-      branchId = authController.currentUser[0]['branch_id'];
-      Timer(const Duration(seconds: 1), () {
-        managerController.getTicketList(branchId);
-      });
-      managerController.getUserList(branchId);
-    });
+    managerController.getUserList(authController.authToken.value);
   }
 
   @override
@@ -183,7 +161,9 @@ class _ManagerDashboardState extends State<ManagerDashboard> {
                   ),
                   trailing: InkWell(
                     onTap: () {
-                     Restart.restartApp();
+                      //  Restart.restartApp();
+                      managerController
+                          .getUserList(authController.authToken.toString());
                     },
                     child: const Icon(
                       Icons.logout,
@@ -296,9 +276,7 @@ class _ManagerDashboardState extends State<ManagerDashboard> {
                       ),
                     ),
                     InkWell(
-                      onTap: () {
-                        managerController.getTicketList(branchId);
-                      },
+                      onTap: () {},
                       child: const Icon(Icons.refresh),
                     ),
                   ],
@@ -322,11 +300,13 @@ class _ManagerDashboardState extends State<ManagerDashboard> {
                             ),
                             trailing: InkWell(
                               onTap: () {
-                                managerController
-                                    .getTicketInfo(e.id)
-                                    .then((value) {
-                                  _showTicketDialog(context);
-                                });
+                                // managerController
+                                //     .getTicketInfo(e.id)
+                                //     .then((value) {
+                                //   _showTicketDialog(context);
+                                // });
+                                managerController.getTicketInfo(e).then(
+                                    (value) => _showTicketDialog(context));
                               },
                               child: const Icon(
                                 Icons.info_outline,
@@ -400,5 +380,4 @@ class _ManagerDashboardState extends State<ManagerDashboard> {
           );
         });
   }
-
 }

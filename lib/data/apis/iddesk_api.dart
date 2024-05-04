@@ -1,6 +1,6 @@
-var getApprovedticket =
-    'https://x8ki-letl-twmt.n7.xano.io/api:D_eRidPY/approvedticketlist?status=approved'; //it's not work
+var createCategoryApi = "http://10.0.2.2:8000/api/category/create";
+var createSubCategoryApi = "http://10.0.2.2:8000/api/subcategory/create";
+var getCategoryLists = "http://10.0.2.2:8000/api/category/list";
 
-var categoryApi = 'https://x8ki-letl-twmt.n7.xano.io/api:D_eRidPY/categories';
-var subCategoryApi =
-    'https://x8ki-letl-twmt.n7.xano.io/api:D_eRidPY/subcategories';
+
+var getUserListAndTikets = "http://10.0.2.2:8000/api/user/list";
