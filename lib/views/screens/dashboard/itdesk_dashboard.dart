@@ -4,6 +4,7 @@ import 'package:intern_project/constants.dart';
 import 'package:intern_project/controllers/authcontroller.dart';
 import 'package:intern_project/controllers/itdesk_controller.dart';
 import 'package:intern_project/controllers/userdashboard_controller.dart';
+import 'package:intern_project/views/screens/accounts/login_screen.dart';
 
 class ItDeskDashboardScreen extends StatefulWidget {
   const ItDeskDashboardScreen({super.key});
@@ -408,9 +409,12 @@ class _ItDeskDashboardScreenState extends State<ItDeskDashboardScreen> {
                 ),
                 trailing: InkWell(
                   onTap: () {
-                    // Restart.restartApp();
-                    itDeskController
-                        .getCategoryList(authController.authToken.value);
+                    authController
+                        .logout(context, authController.authToken.value)
+                        .then(
+                          (value) => Get.off(const LoginScreen(),
+                              transition: Transition.noTransition),
+                        );
                   },
                   child: const Icon(
                     Icons.logout,

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:intern_project/constants.dart';
 import 'package:intern_project/controllers/authcontroller.dart';
 import 'package:intern_project/controllers/userdashboard_controller.dart';
+import 'package:intern_project/views/screens/accounts/login_screen.dart';
 
 class UserDashboard extends StatefulWidget {
   const UserDashboard({super.key});
@@ -207,9 +208,11 @@ class _UserDashboardState extends State<UserDashboard> {
                   ),
                   trailing: InkWell(
                     onTap: () {
-                      // Restart.restartApp();
-                      userController
-                          .getTicketByUser(authController.authToken.value);
+                      authController
+                          .logout(context, authController.authToken.value)
+                          .then(
+                            (value) => Get.off(const LoginScreen(),transition: Transition.noTransition),
+                          );
                     },
                     child: const Icon(
                       Icons.logout,

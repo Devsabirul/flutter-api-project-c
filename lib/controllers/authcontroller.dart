@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:intern_project/views/screens/dashboard/itdesk_dashboard.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intern_project/data/apis/accounts_api.dart';
@@ -60,6 +59,7 @@ class AuthController extends GetxController {
           isLoading.value = false;
 
           var data = jsonDecode(res.body);
+          currentUser.clear();
           currentUser.add(data['users']);
           authToken.value = data['token'];
           role.value = data['users']['role'];
@@ -161,13 +161,36 @@ class AuthController extends GetxController {
   }
 
   // logout info
-  Future logout() async {
-    var prefs = await SharedPreferences.getInstance();
-    prefs.remove("isLoggedIn");
-    prefs.remove("userId");
-    prefs.remove("authToken");
-    prefs.remove("role");
-    clearfield();
+  Future logout(context, token) async {
+    try {
+      final res = await http.post(
+        Uri.parse(logoutApi),
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Authorization": "Bearer $token",
+        },
+      );
+      var data = jsonDecode(res.body);
+      if (res.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(data['message'].toString()),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("${data['message']}"),
+          ),
+        );
+      }
+    } catch (e) {
+      return ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('something wrong, please try again.'),
+        ),
+      );
+    }
   }
-
 }

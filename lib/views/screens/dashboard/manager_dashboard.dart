@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:intern_project/constants.dart';
 import 'package:intern_project/controllers/authcontroller.dart';
 import 'package:intern_project/controllers/manager_controller.dart';
+import 'package:intern_project/views/screens/accounts/login_screen.dart';
 
 class ManagerDashboard extends StatefulWidget {
   const ManagerDashboard({super.key});
@@ -161,9 +162,11 @@ class _ManagerDashboardState extends State<ManagerDashboard> {
                   ),
                   trailing: InkWell(
                     onTap: () {
-                      //  Restart.restartApp();
-                      managerController
-                          .getUserList(authController.authToken.toString());
+                     authController
+                          .logout(context, authController.authToken.value)
+                          .then(
+                            (value) => Get.off(const LoginScreen(),transition: Transition.noTransition),
+                          );
                     },
                     child: const Icon(
                       Icons.logout,
