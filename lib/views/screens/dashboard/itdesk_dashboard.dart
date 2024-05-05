@@ -20,6 +20,7 @@ class _ItDeskDashboardScreenState extends State<ItDeskDashboardScreen> {
   late int userId;
   int branchId = 0;
   String selectedSubCategory = "1";
+  String selectedCategory = "1";
 
   _showTicketDialog(BuildContext context) {
     return showDialog(
@@ -294,7 +295,7 @@ class _ItDeskDashboardScreenState extends State<ItDeskDashboardScreen> {
                     height: 5,
                   ),
                   DropdownButtonFormField<String>(
-                    value: selectedSubCategory,
+                    value: selectedCategory,
                     items: itDeskController.catergoryList.map((e) {
                       return DropdownMenuItem(
                         value: e['id'].toString(),
@@ -303,7 +304,7 @@ class _ItDeskDashboardScreenState extends State<ItDeskDashboardScreen> {
                     }).toList(),
                     onChanged: (value) {
                       setState(() {
-                        selectedSubCategory == value;
+                        selectedCategory == value;
                       });
                     },
                   ),
@@ -316,8 +317,11 @@ class _ItDeskDashboardScreenState extends State<ItDeskDashboardScreen> {
                 children: [
                   TextButton(
                     onPressed: () {
-                      itDeskController.createSubCategoyList(context,
-                          selectedSubCategory, authController.authToken.value);
+                      itDeskController
+                          .createSubCategoyList(context, selectedCategory,
+                              authController.authToken.value)
+                          .then((value) => itDeskController
+                              .getCategoryList(authController.authToken.value));
                     },
                     child: const Text(
                       "Create",
@@ -355,9 +359,12 @@ class _ItDeskDashboardScreenState extends State<ItDeskDashboardScreen> {
     super.initState();
     var data = Get.arguments;
     userId = data[0];
+
     itDeskController.getUserListAndTickets(authController.authToken.value);
     itDeskController.getBranchList(authController.authToken.value);
-    itDeskController.getCategoryList(authController.authToken.value);
+    itDeskController
+        .getCategoryList(authController.authToken.value)
+        .then((value) => selectedCategory = value[0]['id'].toString());
   }
 
   @override

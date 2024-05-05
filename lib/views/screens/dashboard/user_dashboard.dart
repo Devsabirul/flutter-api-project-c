@@ -152,9 +152,16 @@ class _UserDashboardState extends State<UserDashboard> {
     super.initState();
     var data = Get.arguments;
     userId = data[0];
-    userController
-        .getCategories(authController.authToken.value)
-        .then((value) => selectedCategory = value[0]['id'].toString());
+    userController.getCategories(authController.authToken.value).then((value) {
+      if (userController.categories.isNotEmpty) {
+        selectedCategory = value[0]['id'].toString();
+      }
+      if (userController.subCategoryList.isNotEmpty) {
+        selectedSubCategory =
+            userController.subCategoryList[0]['id'].toString();
+      }
+    });
+    print(userController.subCategoryList);
     userController.getTicketByUser(authController.authToken.value);
   }
 
@@ -211,7 +218,8 @@ class _UserDashboardState extends State<UserDashboard> {
                       authController
                           .logout(context, authController.authToken.value)
                           .then(
-                            (value) => Get.off(const LoginScreen(),transition: Transition.noTransition),
+                            (value) => Get.off(const LoginScreen(),
+                                transition: Transition.noTransition),
                           );
                     },
                     child: const Icon(

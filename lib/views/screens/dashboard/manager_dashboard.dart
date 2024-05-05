@@ -74,7 +74,9 @@ class _ManagerDashboardState extends State<ManagerDashboard> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
                     child: const Text(
                       "Approved",
                       style: TextStyle(
@@ -86,7 +88,9 @@ class _ManagerDashboardState extends State<ManagerDashboard> {
                     ),
                   ),
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
                     child: const Text(
                       "Cancel",
                       style: TextStyle(

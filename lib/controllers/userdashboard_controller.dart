@@ -112,7 +112,7 @@ class UserDashboardController extends GetxController {
             "category_id": categoryId.toString(),
             "sub_category_id": subCategoryId.toString(),
             "created_by": userId.toString(),
-            "solved_by": "11",
+            "solved_by": "11", // Change it manually 
           }),
         );
 
