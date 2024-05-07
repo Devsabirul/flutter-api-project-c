@@ -21,7 +21,7 @@ class AuthController extends GetxController {
   RxString userId = ''.obs;
   RxString authToken = ''.obs;
   RxList branchList = [].obs;
-  List branchListDropdown = [];
+  RxList branchListDropdown = [].obs;
   RxList currentUser = [].obs;
 
   RxString role = ''.obs;
@@ -191,6 +191,28 @@ class AuthController extends GetxController {
           content: Text('something wrong, please try again.'),
         ),
       );
+    }
+  }
+
+  Future getBranchForAll() async {
+    try {
+      final res = await http.get(
+        Uri.parse(getBranchListForAll),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      );
+      var data = jsonDecode(res.body);
+      if (res.statusCode == 200) {
+        branchListDropdown.clear();
+        for (Map<String, dynamic> index in data) {
+          branchListDropdown.add(index);
+        }
+      }
+      return branchListDropdown;
+    } catch (e) {
+      return [];
     }
   }
 }

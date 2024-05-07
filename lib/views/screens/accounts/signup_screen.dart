@@ -22,7 +22,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   @override
   void initState() {
-    // selectedBranch = controller.branchList[0].id.toString();
+    controller.getBranchForAll().then((value) {
+      if (value.isNotEmpty) {
+        selectedBranch = value[0]["id"].toString();
+      }
+    });
     super.initState();
   }
 
@@ -157,60 +161,58 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     const SizedBox(
                       height: 15,
                     ),
-                    DropdownButtonFormField<String>(
-                      value: selectedBranch,
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          selectedBranch = newValue!;
-                        });
-                      },
-                      // items: controller.branchListDropdown.map((e) {
-                      //   return DropdownMenuItem(
-                      //     value: e.id.toString(),
-                      //     child: Text(e.name ?? ''),
-                      //   );
-                      // }).toList(),
-                      items: const [
-                        DropdownMenuItem(
-                          value:"1",
-                          child: Text("Branch 1"),
-                        ),
-                      ],
-                      decoration: InputDecoration(
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                            color: Colors.grey,
-                          ),
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        errorMaxLines: 1,
-                        errorBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                            color: Colors.red,
-                          ),
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        focusedErrorBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                            color: Colors.red,
-                          ),
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        hintText: "branch",
-                        hintStyle: const TextStyle(
-                          fontFamily: "Inter",
-                          color: Colors.grey,
-                          fontSize: 16,
-                        ),
-                        contentPadding: const EdgeInsets.only(
-                            top: 15, bottom: 15, left: 20),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                            color: Colors.grey,
-                          ),
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                      ),
+                    Obx(
+                      () => controller.branchListDropdown.isNotEmpty
+                          ? DropdownButtonFormField<String>(
+                              value: selectedBranch,
+                              onChanged: (String? newValue) {
+                                setState(() {
+                                  selectedBranch = newValue!;
+                                });
+                              },
+                              items: controller.branchListDropdown.map((e) {
+                                return DropdownMenuItem(
+                                  value: e['id'].toString(),
+                                  child: Text(e['name'] ?? ''),
+                                );
+                              }).toList(),
+                              decoration: InputDecoration(
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(
+                                    color: Colors.grey,
+                                  ),
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
+                                errorMaxLines: 1,
+                                errorBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(
+                                    color: Colors.red,
+                                  ),
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
+                                focusedErrorBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(
+                                    color: Colors.red,
+                                  ),
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
+                                hintText: "branch",
+                                hintStyle: const TextStyle(
+                                  fontFamily: "Inter",
+                                  color: Colors.grey,
+                                  fontSize: 16,
+                                ),
+                                contentPadding: const EdgeInsets.only(
+                                    top: 15, bottom: 15, left: 20),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(
+                                    color: Colors.grey,
+                                  ),
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
+                              ),
+                            )
+                          : const Text("Loading..."),
                     ),
                     const SizedBox(
                       height: 15,
